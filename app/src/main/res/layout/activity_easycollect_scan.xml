@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
         android:layout_marginTop="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/logo"
@@ -137,7 +138,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/device_count_title"
@@ -162,7 +164,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1.5"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/status_title"
@@ -187,7 +190,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/frame_time_title"
@@ -214,7 +218,8 @@
         android:layout_height="12sp"
         android:layout_marginTop="2dp"
         android:background="#ffcccccc"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/scan_states_color1"
@@ -287,7 +292,8 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
                 android:layout_marginTop="5dp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone"/>
         </RelativeLayout>
 
         <TextView
@@ -299,7 +305,8 @@
             android:gravity="left|center"
             android:paddingLeft="14dp"
             android:textColor="#ff000000"
-            android:visibility="visible" />
+            android:visibility="gone"
+            />
     </LinearLayout>
 
 </LinearLayout>
