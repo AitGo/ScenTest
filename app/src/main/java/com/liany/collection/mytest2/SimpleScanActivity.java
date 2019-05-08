@@ -1,31 +1,3 @@
-/* *************************************************************************************************
- * SimpleScanActivity.java
- *
- * DESCRIPTION:
- *     SimpleScan demo app for IBScanUltimate
- *     http://www.integratedbiometrics.com
- *
- * NOTES:
- *     Copyright (c) Integrated Biometrics, 2012-2017
- *
- * HISTORY:
- *     2013/03/01  First version.
- *     2013/03/06  Added automatic population of capture type spinner based on initialized scanner.
- *                 A refresh from INITIALIZED now checks whether the initialized scanner is present;
- *                 if not, the scanner is closed and the list refreshed.
- *     2013/03/22  Added NFIQ calculation following completion of image capture.
- *     2013/04/06  Made minor changes, including allowing user to supply file name of e-mail image.
- *     2013/10/18  Add support for new finger quality values that indicate presence of finger in
- *                 invalid area along scanner edge.
- *                 Implement new extended result method for IBScanDeviceListener.
- *     2013/06/19  Updated for IBScanUltimate v1.7.3.
- *     2015/04/07  Updated for IBScanUltimate v1.8.4.
- *     2015/12/11  Updated for IBScanUltimate v1.9.0.
- *     2016/01/21  Updated for IBScanUltimate v1.9.2.
- *     2016/09/22  Updated for IBScanUltimate v1.9.4.
- *     2018/03/06  Re-formatted code for IBScanUltimate v2.0.0
- ************************************************************************************************ */
-
 package com.liany.collection.mytest2;
 
 import java.io.File;
@@ -51,8 +23,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Point;
-import android.graphics.RectF;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
@@ -60,27 +30,18 @@ import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.view.Display;
-import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.integratedbiometrics.ibscanultimate.IBScan;
-import com.integratedbiometrics.ibscanultimate.IBScan.SdkVersion;
 import com.integratedbiometrics.ibscanultimate.IBScanDevice;
 import com.integratedbiometrics.ibscanultimate.IBScanDevice.FingerCountState;
 import com.integratedbiometrics.ibscanultimate.IBScanDevice.FingerQualityState;
@@ -93,7 +54,6 @@ import com.integratedbiometrics.ibscanultimate.IBScanDevice.SegmentPosition;
 import com.integratedbiometrics.ibscanultimate.IBScanDeviceListener;
 import com.integratedbiometrics.ibscanultimate.IBScanException;
 import com.integratedbiometrics.ibscanultimate.IBScanListener;
-import collection.PhotoViewAttacher;
 
 
 /**
@@ -121,11 +81,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
     /* The default value of the frame time TextView. */
     protected static final String __NA_DEFAULT__ = "n/a";
 
-    /* The default file name for images and templates for e-mail. */
-    protected static final String FILE_NAME_DEFAULT = "output";
-
-    /* The number of finger qualities set in the preview image. */
-    protected static final int FINGER_QUALITIES_COUNT = 4;
 
     /* The background color of the preview image ImageView. */
     protected static final int PREVIEW_IMAGE_BACKGROUND = Color.LTGRAY;
@@ -135,24 +90,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
      * present.
      */
     protected static final int FINGER_QUALITY_NOT_PRESENT_COLOR = Color.LTGRAY;
-
-    /*
-     * The background color of a finger quality TextView when the finger is good
-     * quality.
-     */
-    protected static final int FINGER_QUALITY_GOOD_COLOR = Color.GREEN;
-
-    /*
-     * The background color of a finger quality TextView when the finger is fair
-     * quality.
-     */
-    protected static final int FINGER_QUALITY_FAIR_COLOR = Color.YELLOW;
-
-    /*
-     * The background color of a finger quality TextView when the finger is poor
-     * quality.
-     */
-    protected static final int FINGER_QUALITY_POOR_COLOR = Color.RED;
 
     protected final int __TIMER_STATUS_DELAY__ = 500;
 
@@ -245,15 +182,12 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
 
     private TextView m_txtStatusMessage;
     private ImageView m_imgPreview;
-    private ImageView m_imgEnlargedView;
     private Spinner m_cboUsbDevices;
     private Spinner m_cboCaptureSeq;
     private Button m_btnCaptureStart;
     private Button m_btnCaptureStop;
-    private Button m_btnCloseEnlargedDialog;
     private Dialog m_enlargedDialog;
     private Bitmap m_BitmapImage;
-    private TextView m_txtEnlargedScale;
 
     /* *********************************************************************************************
      * PRIVATE FIELDS
@@ -301,7 +235,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
     protected String m_strImageMessage = "";
     protected boolean m_bNeedClearPlaten = false;
     protected boolean m_bBlank = false;
-    protected boolean m_bSaveWarningOfClearPlaten;
 
     protected Vector<CaptureInfo> m_vecCaptureSeq = new Vector<CaptureInfo>(); // /<
     // Sequence
@@ -1906,199 +1839,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
             }
         });
     }
-
-    /*
-     * Show enlarged image in popup window.
-     */
-//    private void showEnlargedImage() {
-//        /*
-//         * Sanity check. Make sure the image exists.
-//         */
-//        if (this.m_lastResultImage == null) {
-//            showToastOnUiThread("No last image information", Toast.LENGTH_SHORT);
-//            return;
-//        }
-//
-//        m_enlargedDialog = new Dialog(this, R.style.Enlarged);
-//        m_enlargedDialog.setContentView(R.layout.enlarged);
-//        m_enlargedDialog.setCancelable(false);
-//
-//        final Bitmap bitmap = m_lastResultImage.toBitmap();
-//        m_imgEnlargedView = (ImageView) m_enlargedDialog
-//                .findViewById(R.id.enlarged_image);
-//        m_btnCloseEnlargedDialog = (Button) m_enlargedDialog
-//                .findViewById(R.id.btnClose);
-//        m_txtEnlargedScale = (TextView) m_enlargedDialog
-//                .findViewById(R.id.txtDisplayImgScale);
-//
-//        m_imgEnlargedView.setScaleType(ImageView.ScaleType.CENTER);
-//        m_imgEnlargedView.setImageBitmap(bitmap);
-//        m_btnCloseEnlargedDialog
-//                .setOnClickListener(m_btnCloseEnlargedDialogClickListener);
-//
-//        final PhotoViewAttacher mAttacher = new PhotoViewAttacher(
-//                m_imgEnlargedView);
-//
-//        Display display = getWindowManager().getDefaultDisplay();
-//        Point size = new Point();
-//        display.getSize(size);
-//
-//        int disp_w = size.x - 20; // m_imgEnlargedView.getWidth();
-//        int disp_h = size.y - 50; // m_imgEnlargedView.getHeight();
-//        float ratio_w = (float) disp_w / m_lastResultImage.width;
-//        float ratio_h = (float) disp_h / m_lastResultImage.height;
-//        float ratio_1x = 0.0f;
-//        if (ratio_w > ratio_h) {
-//            ratio_1x = (float) m_lastResultImage.height / disp_h;
-//        } else {
-//            ratio_1x = (float) m_lastResultImage.width / disp_w;
-//        }
-//
-//        mAttacher.setMaximumScale(ratio_1x * 8);
-//        mAttacher.setMediumScale(ratio_1x * 4);
-//        mAttacher.setMinimumScale(ratio_1x);
-//
-//        final float zoom_1x = ratio_1x;
-//        mAttacher
-//                .setOnMatrixChangeListener(new PhotoViewAttacher.OnMatrixChangedListener() {
-//                    @Override
-//                    public void onMatrixChanged(RectF rectF) {
-//                        m_txtEnlargedScale.setText(String.format(
-//                                "Scale : %1$.1f x", mAttacher.getScale()
-//                                        / zoom_1x));
-//                    }
-//                });
-//
-//        m_imgEnlargedView.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                mAttacher.setScale(zoom_1x, false);
-//            }
-//        });
-//
-//        this.m_enlargedDialog.show();
-//    }
-
-    /*
-     * Compress the image and attach it to an e-mail using an installed e-mail
-     * client.
-     */
-    private void sendImageInEmail(final ImageData imageData,
-                                  final String fileName) {
-        boolean created = false;
-        ArrayList ur = new ArrayList();
-        try {
-            {
-                File fp = new File(Environment.getExternalStorageDirectory()
-                        .getPath() + "/" + fileName);
-                fp.createNewFile();
-
-                final FileOutputStream fstream = new FileOutputStream(fp);
-                final Bitmap bitmap = imageData.toBitmap();
-                bitmap.compress(CompressFormat.PNG, 100, fstream);
-                fstream.close();
-
-                ur.add(Uri.fromFile(fp)); // Result image
-            }
-
-            for (int i = 0; i < m_nSegmentImageArrayCount; i++) {
-                File fp = new File(Environment.getExternalStorageDirectory()
-                        .getPath() + "/segment_" + i + "_" + fileName);
-                try {
-                    fp.createNewFile();
-
-                    final FileOutputStream fstream = new FileOutputStream(fp);
-                    final Bitmap bitmap = m_lastSegmentImages[i].toBitmap();
-                    bitmap.compress(CompressFormat.PNG, 100, fstream);
-                    fstream.close();
-
-                    ur.add(Uri.fromFile(fp));
-                } catch (IOException ioe) {
-                    Toast.makeText(getApplicationContext(),
-                            "Could not create image for e-mail",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-
-            created = true;
-        } catch (IOException ioe) {
-            Toast.makeText(getApplicationContext(),
-                    "Could not create image for e-mail", Toast.LENGTH_LONG)
-                    .show();
-        }
-
-        /* If file was created, send the e-mail. */
-        if (created) {
-            attachAndSendEmail(ur, "Fingerprint Image", fileName);
-        }
-    }
-
-    /*
-     * Attach file to e-mail and send.
-     */
-    private void attachAndSendEmail(final ArrayList ur, final String subject,
-                                    final String message) {
-        final Intent i = new Intent(Intent.ACTION_SEND_MULTIPLE);
-        i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_EMAIL, new String[] { "" });
-        i.putExtra(Intent.EXTRA_SUBJECT, subject);
-        // i.putExtra(Intent.EXTRA_STREAM, ur);
-        i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, ur);
-        i.putExtra(Intent.EXTRA_TEXT, message);
-
-        try {
-            startActivity(Intent.createChooser(i, "Send mail..."));
-        } catch (ActivityNotFoundException anfe) {
-            showToastOnUiThread("There are no e-mail clients installed",
-                    Toast.LENGTH_LONG);
-        }
-    }
-
-    /*
-     * Prompt to send e-mail with image.
-     */
-//    private void promptForEmail(final ImageData imageData) {
-//        /* The dialog must be shown from the UI thread. */
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                final LayoutInflater inflater = getLayoutInflater();
-//                final View fileNameView = inflater.inflate(
-//                        R.layout.file_name_dialog, null);
-//                final AlertDialog.Builder builder = new AlertDialog.Builder(
-//                        SimpleScanActivity.this)
-//                        .setView(fileNameView)
-//                        .setTitle("Enter file name")
-//                        .setPositiveButton("OK",
-//                                new DialogInterface.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(
-//                                            final DialogInterface dialog,
-//                                            final int which) {
-//                                        final EditText text = (EditText) fileNameView
-//                                                .findViewById(R.id.file_name);
-//                                        final String fileName = text.getText()
-//                                                .toString();
-//
-//                                        /* E-mail image in background thread. */
-//                                        Thread threadEmail = new Thread() {
-//                                            @Override
-//                                            public void run() {
-//                                                sendImageInEmail(imageData,
-//                                                        fileName);
-//                                            }
-//                                        };
-//                                        threadEmail.start();
-//                                    }
-//                                }).setNegativeButton("Cancel", null);
-//                EditText text = (EditText) fileNameView
-//                        .findViewById(R.id.file_name);
-//                text.setText(FILE_NAME_DEFAULT + "." + "png");
-//
-//                builder.create().show();
-//            }
-//        });
-//    }
 
     /*
      * Exit application.
