@@ -243,15 +243,9 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
      * ***********************************************
      */
 
-    private TextView m_txtDeviceCount;
-    private TextView m_txtNFIQ;
-    private TextView m_txtFrameTime;
     private TextView m_txtStatusMessage;
-    private TextView m_txtOverlayText;
     private ImageView m_imgPreview;
     private ImageView m_imgEnlargedView;
-    private TextView[] m_txtFingerQuality = new TextView[FINGER_QUALITIES_COUNT];
-    private TextView m_txtSDKVersion;
     private Spinner m_cboUsbDevices;
     private Spinner m_cboCaptureSeq;
     private Button m_btnCaptureStart;
@@ -459,23 +453,9 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
      * Initialize UI fields for new orientation.
      */
     private void _InitUIFields() {
-        m_txtDeviceCount = (TextView) findViewById(R.id.device_count);
-        m_txtNFIQ = (TextView) findViewById(R.id.txtNFIQ);
         m_txtStatusMessage = (TextView) findViewById(R.id.txtStatusMessage);
-        m_txtOverlayText = (TextView) findViewById(R.id.txtOverlayText);
-
-        /* Hard-coded for four finger qualities. */
-        m_txtFingerQuality[0] = (TextView) findViewById(R.id.scan_states_color1);
-        m_txtFingerQuality[1] = (TextView) findViewById(R.id.scan_states_color2);
-        m_txtFingerQuality[2] = (TextView) findViewById(R.id.scan_states_color3);
-        m_txtFingerQuality[3] = (TextView) findViewById(R.id.scan_states_color4);
-
-        m_txtFrameTime = (TextView) findViewById(R.id.frame_time);
-
-        m_txtSDKVersion = (TextView) findViewById(R.id.version);
 
         m_imgPreview = (ImageView) findViewById(R.id.imgPreview);
-//        m_imgPreview.setOnLongClickListener(m_imgPreviewLongClickListener);
         m_imgPreview.setBackgroundColor(PREVIEW_IMAGE_BACKGROUND);
 
         m_btnCaptureStop = (Button) findViewById(R.id.stop_capture_btn);
@@ -494,8 +474,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
      */
     private void _PopulateUI() {
 
-        setSDKVersionInfo();
-
         if (m_savedData.usbDevices != __INVALID_POS__) {
             m_cboUsbDevices.setSelection(m_savedData.usbDevices);
         }
@@ -504,26 +482,8 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
             m_cboCaptureSeq.setSelection(m_savedData.captureSeq);
         }
 
-        if (m_savedData.nfiq != null) {
-            m_txtNFIQ.setText(m_savedData.nfiq);
-        }
-
-        if (m_savedData.frameTime != null) {
-            m_txtFrameTime.setText(m_savedData.frameTime);
-        }
-
-        if (m_savedData.overlayText != null) {
-            m_txtOverlayText.setTextColor(m_savedData.overlayColor);
-            m_txtOverlayText.setText(m_savedData.overlayText);
-        }
-
         if (m_savedData.imageBitmap != null) {
             m_imgPreview.setImageBitmap(m_savedData.imageBitmap);
-        }
-
-        for (int i = 0; i < FINGER_QUALITIES_COUNT; i++) {
-            m_txtFingerQuality[i]
-                    .setBackgroundColor(m_savedData.fingerQualityColors[i]);
         }
 
         if (m_BitmapImage != null) {
@@ -561,23 +521,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
             public void run() {
 
                 m_txtStatusMessage.setText(s);
-            }
-        });
-    }
-
-    /*
-     * Set image overlay message text box.
-     */
-    protected void _SetOverlayText(final String s, final int txtColor) {
-        m_savedData.overlayText = s;
-        m_savedData.overlayColor = txtColor;
-
-        /* Make sure this occurs on the UI thread. */
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                m_txtOverlayText.setTextColor(txtColor);
-                m_txtOverlayText.setText(s);
             }
         });
     }
@@ -742,24 +685,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
         m_leftMargin = dispImgX;
         m_topMargin = dispImgY;
         // /////////////////////////////////////////////////////////////////////////////////
-    }
-
-    protected void _DrawOverlay_ImageText(Canvas canvas) {
-        /*
-         * Draw text over bitmap image Paint g = new Paint();
-         * g.setAntiAlias(true); if (m_bNeedClearPlaten) g.setColor(Color.RED);
-         * else g.setColor(Color.BLUE); g.setTypeface(Typeface.DEFAULT);
-         * g.setTextSize(20); // canvas.drawText(m_strImageMessage, 10, 20, g);
-         * canvas.drawText(m_strImageMessage, 20, 40, g);
-         */
-
-        /*
-         * Draw textview over imageview
-         */
-        if (m_bNeedClearPlaten)
-            _SetOverlayText(m_strImageMessage, Color.RED);
-        else
-            _SetOverlayText(m_strImageMessage, Color.BLUE);
     }
 
     protected void _DrawOverlay_WarningOfClearPlaten(Canvas canvas, int left,
@@ -992,18 +917,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
             Thread.sleep(time);
         } catch (InterruptedException e) {
         }
-    }
-
-    protected void _SetTxtNFIQScore(final String s) {
-        this.m_savedData.nfiq = s;
-
-        /* Make sure this occurs on the UI thread. */
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                m_txtNFIQ.setText(s);
-            }
-        });
     }
 
     protected void _SetImageMessage(String s) {
@@ -1381,15 +1294,7 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
         });
     }
 
-    private void OnMsg_SetTxtNFIQScore(final String s) {
-        runOnUiThread(new Runnable() {
 
-            @Override
-            public void run() {
-                _SetTxtNFIQScore(s);
-            }
-        });
-    }
 
     private void OnMsg_Beep(final int beepType) {
         runOnUiThread(new Runnable() {
@@ -1757,7 +1662,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                     m_arrUsbDevices.add("- Please select -");
                     // populate combo box
                     int devices = getIBScan().getDeviceCount();
-                    setDeviceCount(devices);
                     // m_cboUsbDevices.setMaximumRowCount(devices + 1);
 
                     selectedDev = 0;
@@ -1944,7 +1848,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 Canvas canvas = new Canvas(m_BitmapImage);
 
-                _DrawOverlay_ImageText(canvas);
                 _DrawOverlay_WarningOfClearPlaten(canvas, 0, 0, destWidth,
                         destHeight);
                 _DrawOverlay_ResultSegmentImage(canvas, image, destWidth,
@@ -1985,7 +1888,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                         color = Color.LTGRAY;
 
                     m_savedData.fingerQualityColors[i] = color;
-                    m_txtFingerQuality[i].setBackgroundColor(color);
                 }
             }
         });
@@ -2001,59 +1903,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                 Toast toast = Toast.makeText(getApplicationContext(), message,
                         duration);
                 toast.show();
-            }
-        });
-    }
-
-    /*
-     * Set SDK version in SDK version text field.
-     */
-    private void setSDKVersionInfo() {
-        String txtValue;
-
-        try {
-            SdkVersion sdkVersion;
-
-            sdkVersion = m_ibScan.getSdkVersion();
-            txtValue = "SDK version: " + sdkVersion.file;
-        } catch (IBScanException ibse) {
-            txtValue = "(failure)";
-        }
-
-        /* Make sure this occurs on the UI thread. */
-        final String txtValueTemp = txtValue;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                m_txtSDKVersion.setText(txtValueTemp);
-            }
-        });
-    }
-
-    /*
-     * Set device count in device count text box.
-     */
-    private void setDeviceCount(final int deviceCount) {
-        /* Make sure this occurs on the UI thread. */
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                m_txtDeviceCount.setText("" + deviceCount);
-            }
-        });
-    }
-
-    /*
-     * Set frame time in frame time field. Save value for orientation change.
-     */
-    private void setFrameTime(final String s) {
-        m_savedData.frameTime = s;
-
-        /* Make sure this occurs on the UI thread. */
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                m_txtFrameTime.setText(s);
             }
         });
     }
@@ -2464,7 +2313,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
     @Override
     public void deviceImagePreviewAvailable(final IBScanDevice device,
                                             final ImageData image) {
-        setFrameTime(String.format("%1$.3f ms", image.frameTime * 1000));
         OnMsg_DrawImage(device, image);
     }
 
@@ -2527,8 +2375,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                                                    final ImageType imageType, final int detectedFingerCount,
                                                    final ImageData[] segmentImageArray,
                                                    final SegmentPosition[] segmentPositionArray) {
-        setFrameTime(String.format("%1$.3f ms", image.frameTime * 1000));
-
         m_savedData.imagePreviewImageClickable = true;
         m_imgPreview.setLongClickable(true);
         m_lastResultImage = image;
@@ -2603,8 +2449,6 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                     ibse.printStackTrace();
                 }
 
-                OnMsg_SetTxtNFIQScore("" + nfiq_score[0] + "-" + nfiq_score[1]
-                        + "-" + nfiq_score[2] + "-" + nfiq_score[3]);
             }
 
             if (imageStatus == null /* STATUS_OK */) {
