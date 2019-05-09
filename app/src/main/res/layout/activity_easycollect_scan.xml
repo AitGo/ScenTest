@@ -290,7 +290,17 @@
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_weight="0.5"
-            android:text="下一个" />
+            android:text="下一个"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/next_capture_btn"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_weight="0.5"
+            android:text="下一个"
+            android:visibility="visible"/>
 
     </LinearLayout>
 

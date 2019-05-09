@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.ArrayList;
 
@@ -76,7 +78,7 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
      * *********************************************************
      * **********************************
      */
-    public String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "easycollect";
+    public String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "easycollect" + File.separator;
     public static final int RESULT_CODE_STARTCAMERA = 1001;
     public int fingerCode = 11;
     public Map<Integer,String> result = new HashMap<>();
@@ -200,6 +202,7 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
     private Spinner m_cboCaptureSeq;
     private Button m_btnCaptureStart;
     private Button m_btnCaptureStop;
+    private Button m_btnCaptureNext;
     private Dialog m_enlargedDialog;
     private Bitmap m_BitmapImage;
 
@@ -337,11 +340,11 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
     }
 
     private void _InitData() {
-        if(getIntent().getStringExtra("filePath") != null && !getIntent().getStringExtra("filePath").equals("")) {
-            filePath = getIntent().getStringExtra("filePath");
+        if(getIntent().getStringExtra("com.liany.easycollect.filePath") != null && !getIntent().getStringExtra("com.liany.easycollect.filePath").equals("")) {
+            filePath = getIntent().getStringExtra("com.liany.easycollect.filePath");
         }
-        if(getIntent().getSerializableExtra("resultMap") != null ) {
-            result = (Map<Integer, String>) getIntent().getSerializableExtra("resultMap");
+        if(getIntent().getSerializableExtra("com.liany.easycollect.resultMap") != null ) {
+            result = (Map<Integer, String>) getIntent().getSerializableExtra("com.liany.easycollect.resultMap");
         }
         for (Integer key : result.keySet()) {
             if(key == 11) {
@@ -462,6 +465,9 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
         m_btnCaptureStop = (Button) findViewById(R.id.stop_capture_btn);
         m_btnCaptureStop.setOnClickListener(this.m_btnCaptureStopClickListener);
 
+        m_btnCaptureNext = findViewById(R.id.next_capture_btn);
+        m_btnCaptureNext.setOnClickListener(this.m_btnCaptureNextClickListener);
+
         m_btnCaptureStart = (Button) findViewById(R.id.start_capture_btn);
         m_btnCaptureStart
                 .setOnClickListener(this.m_btnCaptureStartClickListener);
@@ -479,6 +485,8 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
         iv_easycollect_right_18 = findViewById(R.id.iv_easycollect_right_18);
         iv_easycollect_right_19 = findViewById(R.id.iv_easycollect_right_19);
         iv_easycollect_right_20 = findViewById(R.id.iv_easycollect_right_20);
+
+        m_tvFigureType.setText(GetFPcode(fingerCode));
     }
 
     /*
@@ -1030,6 +1038,36 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
             filestream = new FileOutputStream(file);
             final Bitmap bitmap = image.toBitmap();
             bitmap.compress(CompressFormat.PNG, 100, filestream);
+            result.put(fingerCode,filename);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(result.get(fingerCode) != null && !result.get(fingerCode).equals("")) {
+                        if(fingerCode == 11) {
+                            iv_easycollect_left_11.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 12) {
+                            iv_easycollect_left_12.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 13) {
+                            iv_easycollect_left_13.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 14) {
+                            iv_easycollect_left_14.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 15) {
+                            iv_easycollect_left_15.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 16) {
+                            iv_easycollect_right_16.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 17) {
+                            iv_easycollect_right_17.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 18) {
+                            iv_easycollect_right_18.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 19) {
+                            iv_easycollect_right_19.setVisibility(View.VISIBLE);
+                        } else if(fingerCode == 20) {
+                            iv_easycollect_right_20.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -1558,7 +1596,7 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
 
                 m_btnCaptureStart.setEnabled(captureSeq);
                 m_btnCaptureStop.setEnabled(captureSeq);
-                m_tvFigureType.setText(GetFPcode(fingerCode));
+
                 if (active) {
                     m_btnCaptureStart.setText("采集");
                 } else {
@@ -1791,6 +1829,21 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
         }
     };
 
+    private OnClickListener m_btnCaptureNextClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(fingerCode < 20 ) {
+                fingerCode++;
+                m_tvFigureType.setText(GetFPcode(fingerCode));
+            } else {
+                //退出界面，得到数据
+                Intent intent = getIntent();
+                intent.putExtra("resultMap", (Serializable) result);
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        }
+    };
     /*
      * Handle click on "Stop capture" button.
      */
@@ -1813,11 +1866,14 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                 _SetStatusBarMessage("下一个");
                 m_strImageMessage = "";
                 _SetImageMessage("");
-                if(fingerCode <= 20 ) {
+                if(fingerCode < 20 ) {
                     fingerCode++;
                 } else {
                     //退出界面，得到数据
-
+                    Intent intent = getIntent();
+                    intent.putExtra("resultMap", (Serializable) result);
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
                 }
                 OnMsg_UpdateDisplayResources();
 
@@ -1854,8 +1910,10 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
                                    final View view, final int pos, final long id) {
             if (pos == 0) {
                 m_btnCaptureStart.setEnabled(false);
+                m_btnCaptureNext.setEnabled(false);
             } else {
                 m_btnCaptureStart.setEnabled(true);
+                m_btnCaptureNext.setEnabled(true);
             }
 
             m_savedData.captureSeq = pos;
@@ -2027,8 +2085,7 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        _SavePngImage(image,filePath + File.separator + "33333");
-//        result.put(fingerCode,)
+        _SavePngImage(image,filePath + UUID.randomUUID().toString().replace("-", ""));
         // imageStatus value is greater than "STATUS_OK", Image acquisition
         // successful.
         if (imageStatus == null /* STATUS_OK */

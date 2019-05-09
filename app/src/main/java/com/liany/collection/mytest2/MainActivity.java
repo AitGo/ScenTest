@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -80,9 +81,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            result.put(20,"");
             String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "easycollect11111";
             Intent intent = new Intent(MainActivity.this,SimpleScanActivity.class);
-            intent.putExtra("filePath",filePath);
-            intent.putExtra("resultMap", (Serializable) result);
-            startActivity(intent);
+            intent.putExtra("com.liany.easycollect.filePath",filePath);
+            intent.putExtra("com.liany.easycollect.resultMap", (Serializable) result);
+            startActivityForResult(intent,1003);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK) {
+            if (requestCode == 1003) {
+                Map<Integer,String> result = (Map<Integer, String>) data.getSerializableExtra("resultMap");
+                String s = result.get(11);
+                s.toString();
+            }
         }
     }
 
