@@ -3,7 +3,9 @@ package com.liany.collection.mytest2;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,10 +18,14 @@ import com.huashi.otg.sdk.HandlerMsg;
 import com.huashi.otg.sdk.HsOtgApi;
 import com.huashi.otg.sdk.Test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -68,7 +74,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (i == R.id.btn_read_auto) {
 
         } else if (i == R.id.button) {
+            Map<Integer,String> result = new HashMap<>();
+//            result.put(11,"111");
+//            result.put(14,"");
+//            result.put(20,"");
+            String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "easycollect11111";
             Intent intent = new Intent(MainActivity.this,SimpleScanActivity.class);
+            intent.putExtra("filePath",filePath);
+            intent.putExtra("resultMap", (Serializable) result);
             startActivity(intent);
         }
     }
