@@ -486,6 +486,14 @@ public class SimpleScanActivity extends Activity implements IBScanListener,
         iv_easycollect_right_19 = findViewById(R.id.iv_easycollect_right_19);
         iv_easycollect_right_20 = findViewById(R.id.iv_easycollect_right_20);
 
+        iv_easycollect_left_11.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fingerCode = 11;
+                m_tvFigureType.setText(GetFPcode(fingerCode));
+            }
+        });
+
         m_tvFigureType.setText(GetFPcode(fingerCode));
     }
 
