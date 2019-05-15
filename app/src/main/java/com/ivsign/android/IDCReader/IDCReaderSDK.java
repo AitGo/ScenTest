@@ -1,4 +1,4 @@
-package ivsign.android.IDCReader;
+package com.ivsign.android.IDCReader;
 
 public class IDCReaderSDK {
 	

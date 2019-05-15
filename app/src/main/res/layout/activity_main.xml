@@ -21,11 +21,24 @@
         android:textColor="#000000"
         android:text="1111"/>
 
+    <TextView
+        android:id="@+id/tv_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:text="1111"/>
+
     <Button
         android:id="@+id/btn_connect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="连接" />
+
+    <Button
+        android:id="@+id/btn_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="返回"/>
 
     <Button
         android:id="@+id/btn_read"
